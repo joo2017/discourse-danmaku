@@ -12,6 +12,7 @@ import {
   openNativeReportByPostNumber,
   sourcePostNumber,
 } from "discourse/plugins/discourse-danmaku/discourse/lib/danmaku-native-report";
+import DanmakuInteractionController from "discourse/plugins/discourse-danmaku/discourse/lib/danmaku-interaction-controller";
 import {
   buildRenderedDanmakuItems,
   currentRouteTopicId,
@@ -913,22 +914,69 @@ module("Unit | Lib | danmaku-global-layer-state", function () {
     assert.expect(4);
 
     assert.deepEqual(
-      replyActionForItem({ topic_id: 10, username: "alice", source_post_url: "/t/source/10/2" }, 10),
-      { type: "composer", mention: "@alice ", topicId: 10 },
-      "same-topic replies can open the composer with a mention"
+      replyActionForItem({ topic_id: 10, source_post_id: 20, source_post_number: 2, username: "alice", source_post_url: "/t/source/10/2" }, 10),
+      { type: "composer", postId: 20, postNumber: 2, topicId: 10 },
+      "same-topic replies open a source-post composer action"
     );
     assert.deepEqual(
-      replyActionForItem({ topic_id: 11, username: "bob", source_post_url: "/t/source/11/3" }, 10),
-      { type: "navigate", mention: "@bob ", topicId: 11, url: "/t/source/11/3" },
-      "other-topic replies navigate to the source before composing"
+      replyActionForItem({ topic_id: 11, source_post_id: 21, username: "bob", source_post_url: "/t/source/11/3" }, 10),
+      { type: "navigate", postId: 21, postNumber: 3, topicId: 11, url: "/t/source/11/3" },
+      "other-topic replies navigate to the source post before composing"
     );
-    assert.deepEqual(replyActionForItem({ topic_id: 12 }, 10), { type: "composer", mention: "", topicId: 12 });
-    assert.deepEqual(replyActionForItem({}, 10), { type: "none", mention: "" });
+    assert.deepEqual(replyActionForItem({ topic_id: 12 }, 10), { type: "composer", postId: null, postNumber: null, topicId: 12 });
+    assert.deepEqual(replyActionForItem({}, 10), { type: "none" });
+  });
+
+  test("reply interaction passes the source post to the native composer instead of mentioning a user", async function (assert) {
+    assert.expect(5);
+
+    const sourcePost = { id: 20, post_number: 2 };
+    const topic = {
+      id: 10,
+      draft_key: "topic_10",
+      draft_sequence: 4,
+      postStream: { posts: [sourcePost] },
+    };
+    const opened = [];
+    const controller = new DanmakuInteractionController({
+      composer: {
+        async open(options) {
+          opened.push(options);
+        },
+        focus() {
+          assert.step("focused");
+        },
+      },
+      currentUser: () => ({ id: 1 }),
+      owner: {
+        lookup(name) {
+          return name === "controller:topic" ? { model: topic } : null;
+        },
+      },
+      router: {
+        currentRoute: { attributes: { topic } },
+      },
+    });
+
+    controller.replyToItem({
+      topic_id: 10,
+      source_post_id: 20,
+      source_post_number: 2,
+      username: "alice",
+    });
+    await Promise.resolve();
+
+    assert.strictEqual(opened.length, 1, "composer opens once");
+    assert.strictEqual(opened[0].topic, topic, "composer receives the current topic");
+    assert.strictEqual(opened[0].post, sourcePost, "composer receives the source post context");
+    assert.strictEqual(opened[0].reply, undefined, "reply body is not prefilled with an @ mention");
+    assert.verifySteps(["focused"]);
   });
 
   test("native report helpers find source posts and defer to Discourse flag controls", (assert) => {
-    assert.expect(9);
+    assert.expect(10);
 
+    assert.strictEqual(sourcePostNumber({ source_post_number: 9, source_post_url: "/t/source-topic/10/3?u=1" }), 9);
     assert.strictEqual(sourcePostNumber({ source_post_url: "/t/source-topic/10/3?u=1" }), 3);
     assert.strictEqual(sourcePostNumber({ source_topic_url: "/t/source-topic/10" }), null);
 

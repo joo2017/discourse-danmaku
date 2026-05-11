@@ -1,4 +1,9 @@
 export function sourcePostNumber(item) {
+  const explicitPostNumber = Number.parseInt(item?.source_post_number, 10);
+  if (Number.isFinite(explicitPostNumber) && explicitPostNumber > 0) {
+    return explicitPostNumber;
+  }
+
   const postUrl = item?.source_post_url || "";
   const match = postUrl.match(/\/(\d+)(?:[?#].*)?$/);
 

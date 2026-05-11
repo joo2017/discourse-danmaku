@@ -1,4 +1,5 @@
 import { DANMAKU_AREA_FACTORS, DANMAKU_HEX_COLOR_REGEXP, DANMAKU_MODE_IDS } from "./danmaku-options";
+import { sourcePostNumber } from "./danmaku-native-report";
 
 const DANMAKU_DEFAULT_VIEWPORT_HEIGHT = 720;
 const DANMAKU_MIN_TRACK_COUNT = 1;
@@ -152,23 +153,23 @@ export function currentRouteTopicId(router) {
 
 export function replyActionForItem(item, currentTopicId) {
   const topicId = positiveInteger(item?.topic_id);
-  const username = item?.username;
-  const mention = username ? `@${username} ` : "";
   const sourceUrl = itemSourceUrl(item);
+  const postId = positiveInteger(item?.source_post_id);
+  const postNumber = sourcePostNumber(item);
 
   if (topicId && topicId === positiveInteger(currentTopicId)) {
-    return { type: "composer", mention, topicId };
+    return { type: "composer", postId, postNumber, topicId };
   }
 
   if (topicId && sourceUrl) {
-    return { type: "navigate", mention, topicId, url: sourceUrl };
+    return { type: "navigate", postId, postNumber, topicId, url: sourceUrl };
   }
 
   if (topicId) {
-    return { type: "composer", mention, topicId };
+    return { type: "composer", postId, postNumber, topicId };
   }
 
-  return { type: "none", mention };
+  return { type: "none" };
 }
 
 export function reducedMotionPreferred(windowObj = globalThis.window) {

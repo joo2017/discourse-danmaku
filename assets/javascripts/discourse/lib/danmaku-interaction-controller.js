@@ -21,6 +21,35 @@ function readValue(object, propertyName) {
 	return object[propertyName];
 }
 
+function positiveInteger(value) {
+	const parsed = Number.parseInt(value, 10);
+	return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+}
+
+function findByPostContext(posts, postId, postNumber) {
+	if (!posts) {
+		return null;
+	}
+
+	const sourcePosts = Array.isArray(posts)
+		? posts
+		: typeof posts.toArray === "function"
+			? posts.toArray()
+			: Array.from(posts);
+
+	return (
+		sourcePosts.find((post) => {
+			const candidateId = positiveInteger(readValue(post, "id"));
+			const candidateNumber = positiveInteger(readValue(post, "post_number"));
+
+			return (
+				(postId && candidateId === postId) ||
+				(postNumber && candidateNumber === postNumber)
+			);
+		}) || null
+	);
+}
+
 export default class DanmakuInteractionController {
 	constructor(options = {}) {
 		this.owner = options.owner;
@@ -125,37 +154,53 @@ export default class DanmakuInteractionController {
 		return Number(currentTopicId) === Number(topicId) ? topic : null;
 	}
 
+	sourcePostModel(topic, replyAction) {
+		if (!topic) {
+			return null;
+		}
+
+		const postId = positiveInteger(replyAction.postId);
+		const postNumber = positiveInteger(replyAction.postNumber);
+		const postStream = readValue(topic, "postStream");
+		const loadedPost = findByPostContext(readValue(postStream, "posts"), postId, postNumber);
+
+		if (loadedPost) {
+			return loadedPost;
+		}
+
+		if (!postId && !postNumber) {
+			return null;
+		}
+
+		return {
+			id: postId,
+			post_number: postNumber,
+			topic_id: positiveInteger(replyAction.topicId),
+			topic,
+		};
+	}
+
 	async openComposerReply(replyAction) {
 		const topic = this.currentTopicModel(replyAction.topicId);
+		const post = this.sourcePostModel(topic, replyAction);
 		const draftKey =
 			readValue(topic, "draft_key") || `topic_${replyAction.topicId}`;
 		const draftSequence = readValue(topic, "draft_sequence") || 0;
+		const composerOptions = {
+			action: this.composerReplyAction,
+			draftKey,
+			draftSequence,
+		};
 
 		if (topic) {
-			await this.composer?.open?.({
-				action: this.composerReplyAction,
-				draftKey,
-				draftSequence,
-				topic,
-				reply: replyAction.mention,
-			});
-		} else {
-			await this.composer?.open?.({
-				action: this.composerReplyAction,
-				draftKey,
-				draftSequence,
-				reply: replyAction.mention,
-			});
+			composerOptions.topic = topic;
 		}
 
-		if (this.composer?.model && replyAction.mention) {
-			if (typeof this.composer.model.set === "function") {
-				this.composer.model.set("reply", replyAction.mention);
-			} else {
-				this.composer.model.reply = replyAction.mention;
-			}
+		if (post) {
+			composerOptions.post = post;
 		}
 
+		await this.composer?.open?.(composerOptions);
 		this.composer?.focus?.();
 	}
 
@@ -169,7 +214,8 @@ export default class DanmakuInteractionController {
 			PENDING_REPLY_KEY,
 			JSON.stringify({
 				createdAt: this.now(),
-				mention: replyAction.mention,
+				postId: replyAction.postId,
+				postNumber: replyAction.postNumber,
 				topicId: replyAction.topicId,
 			}),
 		);
@@ -208,7 +254,8 @@ export default class DanmakuInteractionController {
 		this.sessionStorage?.removeItem?.(PENDING_REPLY_KEY);
 		this.openComposerReply({
 			type: "composer",
-			mention: pendingReply.mention || "",
+			postId: pendingReply.postId,
+			postNumber: pendingReply.postNumber,
 			topicId: pendingReply.topicId,
 		});
 	}

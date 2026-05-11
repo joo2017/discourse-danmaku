@@ -26,5 +26,6 @@ RSpec.describe DiscourseDanmaku::ItemSerializer do
     expect(payload[:source_topic_title]).to eq(topic.title)
     expect(payload[:source_topic_url]).to be_present
     expect(payload[:source_post_url]).to be_present
+    expect(payload[:source_post_number]).to eq(source_post.post_number)
   end
 end

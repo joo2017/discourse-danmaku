@@ -19,7 +19,8 @@ module DiscourseDanmaku
                :created_at,
                :source_topic_title,
                :source_topic_url,
-               :source_post_url
+               :source_post_url,
+               :source_post_number
 
     def username
       object.user&.username
@@ -54,6 +55,12 @@ module DiscourseDanmaku
       return post.url if post&.respond_to?(:url)
 
       nil
+    end
+
+    def source_post_number
+      return nil unless can_view_body?
+
+      object.source_post&.post_number
     end
 
     def liked_by_current_user
