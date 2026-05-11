@@ -2,9 +2,9 @@
 
 class AddDiscourseDanmakuSenderTimeIndex < ActiveRecord::Migration[7.0]
   def change
-    add_index :discourse_danmaku_items,
-              %i[user_id created_at],
-              name: "idx_discourse_danmaku_items_on_user_id_created_at",
-              if_not_exists: true
+    # Intentionally left blank.
+    #
+    # The existing user_id index is sufficient for correctness. Keep this
+    # migration version so sites that already pulled it can advance cleanly.
   end
 end
