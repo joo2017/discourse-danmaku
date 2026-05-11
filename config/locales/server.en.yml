@@ -1,0 +1,81 @@
+en:
+  danmaku:
+    errors:
+      login_required: "Log in to send this reply as Danmaku."
+      premium_required: "You do not have permission to send Danmaku. Join the premium group first."
+      category_excluded: "Danmaku is disabled in this category."
+      cooldown_active: "You are sending Danmaku too quickly. Please wait and try again."
+      daily_cap_reached: "You have reached today's Danmaku sending limit."
+      body_too_long: "This reply is too long to send as Danmaku."
+
+  admin_js:
+    admin:
+      site_settings:
+        categories:
+          danmaku: "Danmaku"
+        danmaku_enabled: "Enable Danmaku"
+        danmaku_allow_basic_users: "Allow ordinary logged-in users to send basic danmaku"
+        danmaku_allow_reader_close: "Allow readers to hide Danmaku"
+        danmaku_premium_group_names: "Premium groups"
+        danmaku_subscribe_url: "Subscription URL"
+        danmaku_global_public_only: "Public global stream only"
+        danmaku_excluded_category_ids: "Excluded categories"
+        danmaku_max_text_length: "Maximum text length"
+        danmaku_max_username_length: "Maximum username display length"
+        danmaku_send_rate_limit_seconds: "Send cooldown seconds"
+        danmaku_daily_limit_per_user: "Daily limit per user"
+        danmaku_global_broadcast_limit_per_minute: "Global broadcasts per minute"
+        danmaku_initial_fetch_limit: "Initial fetch limit"
+        danmaku_initial_replay_count: "Initial replay count"
+        danmaku_max_visible_items: "Maximum visible items"
+        danmaku_default_opacity: "Default opacity"
+        danmaku_default_area: "Default display area"
+        danmaku_mobile_enabled: "Enable on mobile"
+        danmaku_staff_bypass: "Staff bypass"
+
+  admin:
+    site_settings:
+      categories:
+        danmaku: "Danmaku"
+
+  site_settings:
+    humanized_names:
+      danmaku_enabled: "Enable Danmaku"
+      danmaku_allow_basic_users: "Allow ordinary logged-in users to send basic danmaku"
+      danmaku_allow_reader_close: "Allow readers to hide Danmaku"
+      danmaku_premium_group_names: "Premium groups"
+      danmaku_subscribe_url: "Subscription URL"
+      danmaku_global_public_only: "Public global stream only"
+      danmaku_excluded_category_ids: "Excluded categories"
+      danmaku_max_text_length: "Maximum text length"
+      danmaku_max_username_length: "Maximum username display length"
+      danmaku_send_rate_limit_seconds: "Send cooldown seconds"
+      danmaku_daily_limit_per_user: "Daily limit per user"
+      danmaku_global_broadcast_limit_per_minute: "Global broadcasts per minute"
+      danmaku_initial_fetch_limit: "Initial fetch limit"
+      danmaku_initial_replay_count: "Initial replay count"
+      danmaku_max_visible_items: "Maximum visible items"
+      danmaku_default_opacity: "Default opacity"
+      danmaku_default_area: "Default display area"
+      danmaku_mobile_enabled: "Enable on mobile"
+      danmaku_staff_bypass: "Staff bypass"
+
+    danmaku_enabled: "Enable Danmaku overlays site-wide."
+    danmaku_allow_basic_users: "Allow ordinary logged-in users to send basic danmaku without premium color or position tools."
+    danmaku_allow_reader_close: "Allow readers to hide the default-on Danmaku layer. Disable this to keep Danmaku visible while still allowing opacity and area preferences."
+    danmaku_premium_group_names: "Groups allowed to use premium Danmaku color and position tools."
+    danmaku_subscribe_url: "Public subscription or upgrade URL shown in the premium modal."
+    danmaku_global_public_only: "Broadcast only danmaku whose source post is publicly visible."
+    danmaku_excluded_category_ids: "Categories excluded from Danmaku creation and broadcast."
+    danmaku_max_text_length: "Maximum Danmaku text length for creation and display. Existing longer Danmaku are clipped for display."
+    danmaku_max_username_length: "Maximum username characters shown before Danmaku text. Set 0 for no username limit."
+    danmaku_send_rate_limit_seconds: "Minimum seconds between Danmaku sends per user."
+    danmaku_daily_limit_per_user: "Maximum Danmaku sends per user per day."
+    danmaku_global_broadcast_limit_per_minute: "Maximum Danmaku broadcasts allowed globally per minute."
+    danmaku_initial_fetch_limit: "Maximum Danmaku items fetched on initial load."
+    danmaku_initial_replay_count: "Number of latest fetched Danmaku items replayed on page load. Set 0 to keep initial load silent."
+    danmaku_max_visible_items: "Maximum Danmaku items visible at once."
+    danmaku_default_opacity: "Default Danmaku opacity percentage."
+    danmaku_default_area: "Default Danmaku area percentage."
+    danmaku_mobile_enabled: "Enable Danmaku overlays on mobile layouts."
+    danmaku_staff_bypass: "Allow staff to use Danmaku premium tools without belonging to a premium group."

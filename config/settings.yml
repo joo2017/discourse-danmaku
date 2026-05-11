@@ -1,0 +1,77 @@
+danmaku:
+  danmaku_enabled:
+    default: false
+    client: true
+
+  danmaku_premium_group_names:
+    type: group_list
+    default: "danmaku_premium"
+    allow_any: false
+    refresh: true
+
+  danmaku_allow_basic_users:
+    default: true
+    client: true
+
+  danmaku_allow_reader_close:
+    default: true
+    client: true
+
+  danmaku_subscribe_url:
+    default: ""
+    client: true
+
+  danmaku_global_public_only:
+    default: true
+    client: true
+
+  danmaku_excluded_category_ids:
+    type: category_list
+    default: ""
+
+  danmaku_max_text_length:
+    default: 280
+    client: true
+
+  danmaku_max_username_length:
+    default: 0
+    client: true
+
+  danmaku_send_rate_limit_seconds:
+    default: 10
+    client: true
+
+  danmaku_daily_limit_per_user:
+    default: 100
+    client: true
+
+  danmaku_global_broadcast_limit_per_minute:
+    default: 120
+    client: true
+
+  danmaku_initial_fetch_limit:
+    default: 50
+    client: true
+
+  danmaku_initial_replay_count:
+    default: 3
+    client: true
+
+  danmaku_max_visible_items:
+    default: 12
+    client: true
+
+  danmaku_default_opacity:
+    default: 45
+    client: true
+
+  danmaku_default_area:
+    default: 25
+    client: true
+
+  danmaku_mobile_enabled:
+    default: false
+    client: true
+
+  danmaku_staff_bypass:
+    default: false
