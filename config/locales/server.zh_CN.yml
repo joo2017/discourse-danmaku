@@ -1,0 +1,81 @@
+zh_CN:
+  danmaku:
+    errors:
+      login_required: "请登录后再将回复作为弹幕发送。"
+      premium_required: "你没有发送弹幕的权限，请先加入高级用户组。"
+      category_excluded: "该分类已禁用弹幕。"
+      cooldown_active: "弹幕发送太频繁，请稍后再试。"
+      daily_cap_reached: "你今天的弹幕发送次数已达上限。"
+      body_too_long: "这条回复太长，无法作为弹幕发送。"
+
+  admin_js:
+    admin:
+      site_settings:
+        categories:
+          danmaku: "弹幕"
+        danmaku_enabled: "启用弹幕"
+        danmaku_allow_basic_users: "允许普通登录用户发送基础弹幕"
+        danmaku_allow_reader_close: "允许读者关闭弹幕"
+        danmaku_premium_group_names: "高级用户组"
+        danmaku_subscribe_url: "订阅链接"
+        danmaku_global_public_only: "全站流仅公开内容"
+        danmaku_excluded_category_ids: "排除的分类"
+        danmaku_max_text_length: "最大文本长度"
+        danmaku_max_username_length: "用户名显示最大长度"
+        danmaku_send_rate_limit_seconds: "发送冷却秒数"
+        danmaku_daily_limit_per_user: "每用户每日上限"
+        danmaku_global_broadcast_limit_per_minute: "每分钟全站广播上限"
+        danmaku_initial_fetch_limit: "初始拉取数量"
+        danmaku_initial_replay_count: "初始展示最新弹幕数"
+        danmaku_max_visible_items: "最大可见弹幕数"
+        danmaku_default_opacity: "默认透明度"
+        danmaku_default_area: "默认显示区域"
+        danmaku_mobile_enabled: "移动端启用"
+        danmaku_staff_bypass: "管理人员绕过限制"
+
+  admin:
+    site_settings:
+      categories:
+        danmaku: "弹幕"
+
+  site_settings:
+    humanized_names:
+      danmaku_enabled: "启用弹幕"
+      danmaku_allow_basic_users: "允许普通登录用户发送基础弹幕"
+      danmaku_allow_reader_close: "允许读者关闭弹幕"
+      danmaku_premium_group_names: "高级用户组"
+      danmaku_subscribe_url: "订阅链接"
+      danmaku_global_public_only: "全站流仅公开内容"
+      danmaku_excluded_category_ids: "排除的分类"
+      danmaku_max_text_length: "最大文本长度"
+      danmaku_max_username_length: "用户名显示最大长度"
+      danmaku_send_rate_limit_seconds: "发送冷却秒数"
+      danmaku_daily_limit_per_user: "每用户每日上限"
+      danmaku_global_broadcast_limit_per_minute: "每分钟全站广播上限"
+      danmaku_initial_fetch_limit: "初始拉取数量"
+      danmaku_initial_replay_count: "初始展示最新弹幕数"
+      danmaku_max_visible_items: "最大可见弹幕数"
+      danmaku_default_opacity: "默认透明度"
+      danmaku_default_area: "默认显示区域"
+      danmaku_mobile_enabled: "移动端启用"
+      danmaku_staff_bypass: "管理人员绕过限制"
+
+    danmaku_enabled: "在全站启用弹幕浮层。"
+    danmaku_allow_basic_users: "允许普通登录用户发送基础弹幕，但不包含高级颜色或位置工具。"
+    danmaku_allow_reader_close: "允许读者隐藏默认开启的弹幕层。关闭该项后，弹幕保持显示，但读者仍可调整透明度和显示区域。"
+    danmaku_premium_group_names: "允许使用弹幕颜色和位置高级工具的用户组。"
+    danmaku_subscribe_url: "在高级功能弹窗中展示给免费用户的订阅或升级链接。"
+    danmaku_global_public_only: "只广播来源帖子对匿名用户公开可见的弹幕。"
+    danmaku_excluded_category_ids: "禁止创建和广播弹幕的分类。"
+    danmaku_max_text_length: "弹幕创建和展示的文本最大长度。已有更长弹幕会按此长度截断展示。"
+    danmaku_max_username_length: "弹幕中文字名前显示的用户名最大字符数。设为 0 表示不限制用户名长度。"
+    danmaku_send_rate_limit_seconds: "同一用户两次发送弹幕之间的最少间隔秒数。"
+    danmaku_daily_limit_per_user: "每个用户每天最多可发送的弹幕数量。"
+    danmaku_global_broadcast_limit_per_minute: "全站每分钟最多允许广播的弹幕数量。"
+    danmaku_initial_fetch_limit: "首次加载时最多拉取的弹幕数量。"
+    danmaku_initial_replay_count: "进入页面时展示的最新弹幕数量。设为 0 表示首次加载不展示历史弹幕。"
+    danmaku_max_visible_items: "同一时间最多显示的弹幕数量。"
+    danmaku_default_opacity: "弹幕默认透明度百分比。"
+    danmaku_default_area: "弹幕默认显示区域百分比。"
+    danmaku_mobile_enabled: "在移动端布局中启用弹幕浮层。"
+    danmaku_staff_bypass: "允许管理人员不加入高级用户组也能使用弹幕高级工具。"

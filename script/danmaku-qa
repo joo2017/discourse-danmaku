@@ -1,0 +1,211 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$ROOT_DIR"
+
+PLUGIN_NAME="discourse-danmaku"
+EVIDENCE_COMMANDS_FILE=".sisyphus/evidence/final-test-command.txt"
+
+log() {
+  printf '[danmaku-qa] %s\n' "$*"
+}
+
+fail() {
+  printf '[danmaku-qa] ERROR: %s\n' "$*" >&2
+  exit 1
+}
+
+require_file() {
+  local path="$1"
+  [[ -f "$path" ]] || fail "missing required file: $path"
+  log "found $path"
+}
+
+require_dir() {
+  local path="$1"
+  [[ -d "$path" ]] || fail "missing required directory: $path"
+  log "found $path/"
+}
+
+collect_files() {
+  local -a roots=("$@")
+  local -a files=()
+  local root
+
+  for root in "${roots[@]}"; do
+    [[ -e "$root" ]] || continue
+    while IFS= read -r -d '' file; do
+      files+=("$file")
+    done < <(find "$root" -type f -print0)
+  done
+
+  printf '%s\0' "${files[@]}"
+}
+
+log "checking required files"
+require_file "README.md"
+require_file "plugin.rb"
+require_file "config/settings.yml"
+require_file "config/locales/server.en.yml"
+require_file "config/locales/client.en.yml"
+require_file "lib/discourse_danmaku/engine.rb"
+require_file "lib/discourse_danmaku/permissions.rb"
+require_file "lib/discourse_danmaku/post_creator_extension.rb"
+require_file "lib/discourse_danmaku/publisher.rb"
+require_file "app/controllers/discourse_danmaku/items_controller.rb"
+require_file "assets/javascripts/discourse/api-initializers/danmaku.js"
+require_file "test/javascripts/unit/danmaku-composer-state-test.js"
+require_file "spec/lib/discourse_danmaku/permissions_spec.rb"
+require_dir "app"
+require_dir "assets"
+require_dir "config"
+require_dir "lib"
+require_dir "spec"
+require_dir "test"
+
+log "running Ruby syntax checks"
+while IFS= read -r -d '' file; do
+  ruby -c "$file" >/dev/null
+  log "ruby syntax ok: $file"
+done < <(find plugin.rb lib app spec db -type f \( -name '*.rb' -o -path '*/migrate/*' \) -print0)
+
+log "running JavaScript syntax checks"
+if command -v node >/dev/null 2>&1; then
+  while IFS= read -r -d '' file; do
+    case "$file" in
+      *.js)
+        node --check "$file" >/dev/null
+        log "js syntax ok: $file"
+        ;;
+      *.gjs)
+        log "skipping node syntax for template file: $file"
+        ;;
+    esac
+  done < <(find assets test -type f \( -name '*.js' -o -name '*.gjs' \) -print0)
+else
+  log "node not found, skipped JavaScript syntax checks"
+fi
+
+log "parsing YAML settings and locales"
+if command -v python3 >/dev/null 2>&1 && python3 -c 'import yaml' >/dev/null 2>&1; then
+  python3 - <<'PY'
+from pathlib import Path
+import yaml
+
+for path in [Path("config/settings.yml"), Path("config/locales/server.en.yml"), Path("config/locales/client.en.yml")]:
+    with path.open("r", encoding="utf-8") as handle:
+        yaml.safe_load(handle)
+    print(f"[danmaku-qa] yaml ok: {path}")
+PY
+elif ruby -e 'require "yaml"' >/dev/null 2>&1; then
+  ruby -ryaml -e 'ARGV.each { |path| YAML.load_file(path); puts "[danmaku-qa] yaml ok: #{path}" }' \
+    config/settings.yml config/locales/server.en.yml config/locales/client.en.yml
+else
+  log "no python3 or Ruby YAML parser available, skipped YAML parse"
+fi
+
+log "checking required settings"
+required_settings=(
+  danmaku_enabled
+  danmaku_premium_group_names
+  danmaku_subscribe_url
+  danmaku_global_public_only
+  danmaku_excluded_category_ids
+  danmaku_max_text_length
+  danmaku_max_username_length
+  danmaku_send_rate_limit_seconds
+  danmaku_daily_limit_per_user
+  danmaku_global_broadcast_limit_per_minute
+  danmaku_initial_fetch_limit
+  danmaku_initial_replay_count
+  danmaku_max_visible_items
+  danmaku_default_opacity
+  danmaku_default_area
+  danmaku_mobile_enabled
+  danmaku_staff_bypass
+)
+
+for setting in "${required_settings[@]}"; do
+  grep -q "^[[:space:]]*$setting:" config/settings.yml || fail "missing setting key: $setting"
+  log "setting key ok: $setting"
+done
+
+scan_paths=(README.md script config lib app assets test spec plugin.rb)
+
+log "checking forbidden payment internals"
+payment_patterns=(
+  "DiscourseSubscriptions""::Subscription"
+  "str""ipe"
+  "customer""_id"
+  "external""_id"
+)
+payment_regex="$(IFS='|'; printf '%s' "${payment_patterns[*]}")"
+if grep -R -n -E "$payment_regex" "${scan_paths[@]}"; then
+  fail "forbidden Subscriptions or payment internal pattern found"
+fi
+log "forbidden payment internals absent"
+
+log "checking forbidden frontend and test slop"
+slop_patterns=(
+  "register""ConnectorClass"
+  "create""Widget"
+  "decorate""Widget"
+  "TO""DO"
+  "FIX""ME"
+  "HA""CK"
+  "x""xx"
+  "console\\."
+  "@ts""-ignore"
+  "as"" any"
+  "html""Safe"
+  "expect\\(true\\)"
+  "skip\\("
+  "pending\\("
+)
+slop_regex="$(IFS='|'; printf '%s' "${slop_patterns[*]}")"
+if grep -R -n -E "$slop_regex" "${scan_paths[@]}"; then
+  fail "forbidden frontend or test slop pattern found"
+fi
+log "forbidden frontend and test slop absent"
+
+log "integrated Discourse commands"
+if [[ -f "$EVIDENCE_COMMANDS_FILE" ]]; then
+  sed -n '/^```sh$/,/^```$/p' "$EVIDENCE_COMMANDS_FILE"
+else
+  cat <<'COMMANDS'
+RAILS_ENV=test LOAD_PLUGINS=1 bin/rake db:create
+RAILS_ENV=test LOAD_PLUGINS=1 script/silence_successful_output bin/rake db:migrate
+RAILS_ENV=test LOAD_PLUGINS=1 bin/rake parallel:create
+RAILS_ENV=test LOAD_PLUGINS=1 script/silence_successful_output bin/rake parallel:migrate
+RAILS_ENV=test bin/rake "plugin:turbo_spec[discourse-danmaku,--verbose --format=progress --use-runtime-info --profile=50]"
+RAILS_ENV=test bin/rake "plugin:qunit[discourse-danmaku]"
+COMMANDS
+fi
+
+if [[ -n "${DISCOURSE_DEV_PATH:-}" ]]; then
+  log "checking DISCOURSE_DEV_PATH=$DISCOURSE_DEV_PATH"
+  [[ -d "$DISCOURSE_DEV_PATH" ]] || fail "DISCOURSE_DEV_PATH is not a directory"
+  [[ -f "$DISCOURSE_DEV_PATH/bin/rake" ]] || fail "DISCOURSE_DEV_PATH does not look like a Discourse checkout"
+
+  plugin_path="$DISCOURSE_DEV_PATH/plugins/$PLUGIN_NAME"
+  if [[ -e "$plugin_path" ]]; then
+    log "host plugin path exists: $plugin_path"
+  elif [[ "${DANMAKU_QA_SYMLINK:-}" == "1" ]]; then
+    mkdir -p "$DISCOURSE_DEV_PATH/plugins"
+    ln -s "$ROOT_DIR" "$plugin_path"
+    log "created symlink: $plugin_path -> $ROOT_DIR"
+  else
+    log "host plugin path is missing: $plugin_path"
+    log "safe opt-in: set DANMAKU_QA_SYMLINK=1 to create a symlink, or install the plugin manually"
+  fi
+
+  log "from the host checkout, run:"
+  log "cd $DISCOURSE_DEV_PATH"
+  log "RAILS_ENV=test bin/rake \"plugin:turbo_spec[$PLUGIN_NAME,--verbose --format=progress --use-runtime-info --profile=50]\""
+  log "RAILS_ENV=test bin/rake \"plugin:qunit[$PLUGIN_NAME]\""
+else
+  log "DISCOURSE_DEV_PATH not set, skipped host Discourse guidance check"
+fi
+
+log "local QA complete"

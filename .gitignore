@@ -1,0 +1,14 @@
+/.bundle
+/.idea
+/log
+/node_modules
+/public/assets
+/public/backups
+/tmp
+coverage/
+*.swp
+.DS_Store
+.kkirikkiri/
+.omx/
+.playwright-mcp/
+.sisyphus/
